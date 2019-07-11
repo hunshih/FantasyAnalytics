@@ -1,0 +1,4 @@
+//replace "@ " with "@" in all files in current dir
+sed -i "" "s/\@ /\@/g" *
+link: https://stackoverflow.com/questions/28592043/what-is-wrong-with-my-string-substitution-using-sed-on-mac-os-x
+https://www.cyberciti.biz/faq/how-to-use-sed-to-find-and-replace-text-in-files-in-linux-unix-shell/
