@@ -7,28 +7,19 @@ import re
 
 DEFENSE_FILTER = r"athlete\":{\"(.*?)\"desc\"}]}]}}"
 DEFENSE_REGEX = r"name\":\"([a-zA-Z\.\-\'\ ]*)\".*?position\":\"(\w*).*?statGroups\":{\"title\":\"(\w*).*?gamesPlayed\",\"displayValue\":\"(\d*).*?soloTackles\",\"displayValue\":\"(\d*).*?assistTackles\",\"displayValue\":\"(\d*).*?totalTackles\",\"displayValue\":\"(\d*).*?sacks\",\"displayValue\":\"(\d*).*?sackYards\",\"displayValue\":\"(\d*).*?tacklesForLoss\",\"displayValue\":\"(\d*).*?passesDefended\",\"displayValue\":\"(\d*).*?interceptions\",\"displayValue\":\"(\d*).*?interceptionYards\",\"displayValue\":\"(\d*).*?longInterception\",\"displayValue\":\"(\d*).*?interceptionTouchdowns\",\"displayValue\":\"(\d*).*?fumblesForced\",\"displayValue\":\"(\d*).*?fumblesRecovered\",\"displayValue\":\"(\d*).*?fumblesTouchdowns\",\"displayValue\":\"(\d*).*?kicksBlocked\",\"displayValue\":\"(\d*)"
+
 def processData(data):
     global DEFENSE_REGEX
-    #print DEFENSE_REGEX
-    #DEFENSE_REGEX = r"" + re.escape(DEFENSE_REGEX)
-    #players = re.findall(r"\{\"athlete\":{\"name\":\"(?P<name>[a-zA-Z\.\-\'\ ]*)\".*?position\":\"(?P<pos>\w*)",data)
+    total = 0
     player_datum = re.findall(DEFENSE_FILTER, data)
     for player_data in player_datum:
-        player = re.search("Keith Brooking",player_data)
+        player = re.search(DEFENSE_REGEX,player_data)
         if player:
-            print player_data
+            print player.groups()
             print "============"
-        #print player_data
-        #print "=================="
-
-    #player = re.search(DEFENSE_REGEX,player_data[0])
-    #print defense_data.group(0)
-        #player = re.search(DEFENSE_REGEX,player_data)
-        #if player:
-            #print player
-    #for player in players:
-    #    print player
+            total += 1
     print len(player_datum)
+    print total
 
 def scrape(url):
     """
