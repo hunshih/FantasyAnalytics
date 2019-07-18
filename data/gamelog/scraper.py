@@ -15,6 +15,13 @@ TEAM_REGEX = r"/name/([a-z]*)/season/"
 FAIL = []
 URLS = []
 YEARS = {2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018}
+REMAIN = [
+    "https://www.espn.com/nfl/team/stats/_/name/mia/season/2011",
+    "https://www.espn.com/nfl/team/stats/_/name/no/season/2015",
+    "https://www.espn.com/nfl/team/stats/_/name/nyj/season/2012",
+    "https://www.espn.com/nfl/team/stats/_/name/sea/season/2013"
+]
+DB_CONN = DbConn.create_connection();
 
 def getInfo(url):
     global YEAR_REGEX
@@ -41,6 +48,7 @@ def fillGlobal():
 
 def processData(data, year, team):
     global DEFENSE_REGEX
+    global DB_CONN
     dict = {}
     #1st pass. May miss the first defense player
     player_datum = re.findall(DEFENSE_FILTER_FIRST, data)
@@ -53,11 +61,28 @@ def processData(data, year, team):
         player = re.search(DEFENSE_REGEX,player_data)
         if player and player.group(3) == "Defense":
             dict[player.group(1)] = player
+
     #get DB connection
-    conn = DbConn.create_connection();
     for name, stats in dict.items():
-        DbConn.upsert(conn, stats, year, team)
+        DbConn.upsert(DB_CONN, stats, year, team)
         #print (name," : ", stats.groups()) 
+
+def scrape_single(url):
+    global FAIL
+    try:
+        with closing(get(url, stream=True)) as resp:
+            if is_good_response(resp):
+                data = resp.content
+                (year, team) = getInfo(url)
+                processData(data, year, team)                   
+            else:
+                FAIL.append(url)
+
+    except RequestException as e:
+        log_error('Error during requests to {0} : {1}'.format(url, str(e)))
+        FAIL.append(url)
+
+
 
 def scrape():
     """
@@ -65,30 +90,28 @@ def scrape():
     If the content-type of response is some kind of HTML/XML, return the
     text content, otherwise return None.
     """
-
     global FAIL
     global URLS
     count = 0
     threshold = len(URLS)/10
     for url in URLS:
-        try:
-            with closing(get(url, stream=True)) as resp:
-                if is_good_response(resp):
-                    data = resp.content
-                    (year, team) = getInfo(url)
-                    processData(data, year, team)                   
-                else:
-                    FAIL.append(url)
-
-        except RequestException as e:
-            log_error('Error during requests to {0} : {1}'.format(url, str(e)))
-            FAIL.append(url)
+        scrape_single(url)
         count += 1
         if count > threshold:
             print "completed " + str(count*10/(len(URLS)/10)) + " percent"
             threshold += len(URLS)/10
         time.sleep( 5 )
 
+    if len(FAIL) == 0:
+        print "All Success!"
+    else:
+        print FAIL
+        print len(FAIL)
+
+def scrapeSpecific():
+    global REMAIN
+    for url in REMAIN:
+        scrape_single(url)
     if len(FAIL) == 0:
         print "All Success!"
     else:
@@ -120,7 +143,8 @@ def loadRegex():
 
 def main():
     fillGlobal()
-    scrape()
+    #scrape() #This scrapes all teams data
+    scrapeSpecific() #This scrapes the ones that failed
 
 
 main()
