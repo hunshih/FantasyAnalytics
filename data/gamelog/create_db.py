@@ -21,7 +21,7 @@ def create_player(conn, player):
     sql = ''' INSERT or REPLACE INTO defense(name,year,team,position,game_played,solo_tackles,
     assist_tackles,total_tackles,sack,sack_yards,tfl,passes_defended,interceptions,interception_yards,
     long_interception,interception_td,fumble_forced,fumble_rec,fumble_td,kicks_blocked)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) '''
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, player)
     return cur.lastrowid
