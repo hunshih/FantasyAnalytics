@@ -73,6 +73,33 @@ def getPlayerStats(result, player, year):
         result["total_interception"] += avg_interception
         result["players"] += 1 #only count players if they have record from year before
 
+def record_correlation(year, team, stats):
+    global DB_CONN
+    cur = DB_CONN.cursor()
+    sql = "SELECT result, pass_yards, home from qbdata where opponent = \"" + team.upper() + "\" AND year = " + str(year)
+    cur.execute(sql)
+    rows = cur.fetchall()
+    select_away = 0
+    yards = 0
+    result = "W"
+    for row in rows:
+        if yards == 0:
+            yards = row[1]
+            result = row[0]
+        elif row[2] == 0: #else only select away game
+            yards = row[1]
+            result = row[0]
+    if yards == 0:
+        print ("Missing data for %d", year)
+    sql = ''' INSERT or REPLACE INTO correlation(name,year,opp,result,yards,sacks,intercep,
+    tackles,avg_sack,avg_int,avg_tackle) 
+    VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
+    correlation = ("Matthew Stafford", year, team, result, yards, stats["total_sack"], 
+        stats["total_interception"], stats["total_tackle"], stats["avg_sack"],
+        stats["avg_interception"], stats["avg_tackle"])
+    cur.execute(sql, correlation)
+    DB_CONN.commit()
+
 def main():
     #1. First get all games played, 128 of them
     fetchQB()
@@ -107,7 +134,8 @@ def main():
         team_stats["avg_tackle"] = team_stats["total_tackle"]/float(team_stats["players"])
         team_stats["avg_interception"] = team_stats["total_interception"]/float(team_stats["players"])
         team_stats["avg_sack"] = team_stats["total_sack"]/float(team_stats["players"])
-        print team_stats
+        #print team_stats
         #6. Once sum is complete, write a row to correlation
+        record_correlation(year, team, team_stats)
 
 main()
