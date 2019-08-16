@@ -8,14 +8,15 @@ import numpy as np
 from sklearn import datasets, linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
 
 #graph linear model and return the accuracy and regression
-def linear(x_train, y_train, x_test, y_test):
+def linear(x_train, x_test, y_train, y_test):
     reg = LinearRegression().fit(x_train, y_train)
-    yard_pred = regr.predict(x_test)
+    yard_pred = reg.predict(x_test)
     
     # The coefficients
-    print('Coefficients: \n', regr.coef_)
+    print('Coefficients: \n', reg.coef_)
 
     # The mean squared error
     print("Mean squared error: %.2f"
@@ -35,39 +36,40 @@ def linear(x_train, y_train, x_test, y_test):
 
 # return (x_train data, y_train, x_test data, y_test)
 def getData(target):
-    sql = "SELECT year, yards, " + target + " FROM correlation WHERE name = \'Matthew Stafford\'"
+    sql = "SELECT year, yards, " + target + " FROM correlation WHERE name = \'Matthew Stafford\' order by year asc"
     conn = DbConn.create_connection()
     cur = conn.cursor()
     cur.execute(sql)
     rows = cur.fetchall()
-    x_train = []
-    y_train = []
-    x_test = []
-    y_test = []
+    x = []
+    y = []
     for row in rows:
-        if row[0] < 2018 :
-            x_train.append(row[2])
-            y_train.append(row[1])
-        else:
-            x_test.append(row[2])
-            y_test.append(row[1])
-    return (x_train, y_train, x_test, y_test)
+        x_sub = []
+        x_sub.append(row[2])
+        x.append(x_sub)
+        y.append(row[1])
+    return (x, y)
 
 # return accuracy
 def correlation(target, color):
-    # print getData(target)
-    (x_train, y_train, x_test, y_test) = getData(target)
-    '''plt.scatter(x_train, y_train)
-    plt.title(target)
-    plt.show()'''
-    linear(x_train, y_train, x_test, y_test)
+    #print getData(target)
+    (x, y) = getData(target)
+    print x
+    print y
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1)
+    #plt.scatter(x_train, y_train)
+    #plt.title(target)
+    #plt.show()
+    print x_train
+    print x_test
+    linear(x_train, x_test, y_train, y_test)
 
 def main():
     correlation("sacks", "bo")
-    #correlation("intercep", "go")
-    #correlation("tackles", "ro")
-    #correlation("avg_sack", "bo")
-    #correlation("avg_int", "go")
-    #correlation("avg_tackle", "ro")
+    '''correlation("intercep", "go")
+    correlation("tackles", "ro")
+    correlation("avg_sack", "bo")
+    correlation("avg_int", "go")
+    correlation("avg_tackle", "ro")'''
 
 main()
