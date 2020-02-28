@@ -2,16 +2,22 @@
 import sqlite3
 from sqlite3 import Error
  
- 
-def create_connection():
+def connection_impl(db_file):
     """ create a database connection to a SQLite database """
-    db_file = "/Users/henry/Desktop/FantasyAnalytics/data/player.db"
     try:
         conn = sqlite3.connect(db_file)
         return conn
     except Error as e:
         print(e)
     return None
+ 
+def create_connection():
+    """ legacy """
+    connection_impl("/Users/henry/Desktop/FantasyAnalytics/data/player.db"):
+
+def create_connection(db_file):
+    """ proper api """
+    connection_impl(db_file)
 
 def create_player(conn, player):
     """

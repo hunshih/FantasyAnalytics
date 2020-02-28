@@ -9,6 +9,8 @@ from sklearn import datasets, linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
+import numpy as np
+from numpy.polynomial.polynomial import polyfit
 
 #graph linear model and return the accuracy and regression
 def linear(x_train, x_test, y_train, y_test, target):
@@ -31,7 +33,8 @@ def linear(x_train, x_test, y_train, y_test, target):
     plt.figure()
     plt.xlabel(target, fontsize=18)
     plt.ylabel('yards', fontsize=16)
-    plt.scatter(x_test, y_test,  color='black')
+    plt.scatter(x_train, y_train, color='black')
+    plt.scatter(x_test, y_test,  color='red')
     plt.plot(x_test, yard_pred, color='blue', linewidth=3)
 
 def adjustedScore(sack, inter, tackle):

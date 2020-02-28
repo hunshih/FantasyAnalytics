@@ -2,3 +2,18 @@
 sed -i "" "s/\@ /\@/g" *
 link: https://stackoverflow.com/questions/28592043/what-is-wrong-with-my-string-substitution-using-sed-on-mac-os-x
 https://www.cyberciti.biz/faq/how-to-use-sed-to-find-and-replace-text-in-files-in-linux-unix-shell/
+
+- Interested Topics
+  PCA
+  Neuronet
+  Game time
+  Large data source
+  Game history 
+  Clustering
+
+- Goal: One blog every 2 weeks, but shorter ones, focusing on one concept to apply into prediction of some sort. At the end, all blogs should come together and conclude to some prediction model
+  - 1/12: Define new question, collect lots of data, and do feature selection. Explore different feature selection algorithms
+
+- Problems:
+  More data: Where to get data
+  Features: What kind of data do I care about
