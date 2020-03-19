@@ -5,9 +5,10 @@ from time import strptime
 
 URL_FORMAT = 'http://www.nfl.com/schedules/%d/REG/%s'
 TEAM_CITY_MAP = {}
+TEAM_MAP = {}
 # All Regex's
 DATE_REG = r"<span class=\"mon\">(\w{3})</span><span class=\"day\">(\d{2})"
-TEAM_REG = r"team-logo away ([a-zA-Z]*)\".*data-score-mobile=\"(\d*)\".*team-logo home ([a-zA-Z]*)\".*data-score-mobile=\"(\d*)\""
+TEAM_REG = r"team-logo away ([a-zA-Z]*)\".*data-score-mobile=\"(\d*)\".*\n.*\n.*\n.*team-logo home ([a-zA-Z]*)\".*data-score-mobile=\"(\d*)\""
 
 def createUrl(year, team):
     return 'http://www.nfl.com/schedules/%d/REG/%s' % (year, team)
@@ -20,22 +21,32 @@ def teamCityMapping():
         line = (line.strip()).split(",")
         TEAM_CITY_MAP[line[0]] = line[1]
 
+def teamMapping():
+    file = open("team_list.txt", "r")
+    global TEAM_MAP
+    Lines = file.readlines()
+    for line in Lines:
+        line = (line.strip()).split(",")
+        TEAM_MAP[line[0]] = line[1]
+
 def createDate(dateArry, year):
     # This function assumes dateArry contains [ Month, Day ]
     # returns date formate YYYYMMDD
     return 10000 * year + 100 * strptime(dateArry[0],'%b').tm_mon + int(dateArry[1])
 
-def extractSchedule(data, year):
+def extractSchedule(data, year, sch_team):
     # Fields to extract: date, home, away, score, away_score, win
     global DATE_REG
     result = {}
+
+    global TEAM_MAP
 
     # declare all arrays
     dates = []
     home = []
     away = []
-    score = []
-    op_score = []
+    home_score = []
+    away_score = []
     win = []
 
     # get all dates
@@ -44,24 +55,48 @@ def extractSchedule(data, year):
         dates.append( createDate(gameDate,year) )
     result['dates'] = dates
 
-    # get all home team
+    # get all teams and scores
+    teams = re.findall(TEAM_REG, data)
+    for team in teams:
+        away.append(team[0])
+        away_score.append( int(team[1]) )
+        home.append(team[2])
+        home_score.append( int(team[3]) )
+        
+        # decided if the team wins
+        # Away wins. -1 gets last item
+        if away_score[-1] > home_score[-1] :
+            if sch_team == TEAM_MAP[away[-1]]:
+                win.append(1)
+            else:
+                win.append(0)
+        else:
+            if sch_team == TEAM_MAP[away[-1]]:
+                win.append(0)
+            else:
+                win.append(1)
 
+    result['away'] = away
+    result['away_score'] = away_score
+    result['home'] = home
+    result['home_score'] = home_score
+    result['win'] = win
 
-    # get all away team
+    print result
+    return result
 
 
 def main():
-    teamCityMapping()
-    global TEAM_CITY_MAP
-    print TEAM_CITY_MAP
-    # scrape single page
-    
 
+    #construct a global team map
+    teamMapping()
+
+    # scrape single page
     result = scraper.scrape_single('http://www.nfl.com/schedules/2003/REG/49ERS')
     if result != None:
         #print(result)
         print createUrl(1970, '49ERS')
-        extractSchedule(result, 1970)
+        extractSchedule(result, 1970, '49ers')
     else:
         print('failed to scrape')
     
