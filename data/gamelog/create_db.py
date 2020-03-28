@@ -6,14 +6,18 @@ def connection_impl(db_file):
     """ create a database connection to a SQLite database """
     try:
         conn = sqlite3.connect(db_file)
+        print "successful db connection"
         return conn
     except Error as e:
         print(e)
     return None
- 
+
+def connect_schedule_db():
+    return connection_impl("/Users/henry/Desktop/FantasyAnalytics/data/schedule.db")    
+
 def create_connection():
     """ legacy """
-    connection_impl("/Users/henry/Desktop/FantasyAnalytics/data/player.db"):
+    return connection_impl("/Users/henry/Desktop/FantasyAnalytics/data/player.db")
 
 def create_connection(db_file):
     """ proper api """
